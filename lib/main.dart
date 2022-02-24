@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -51,11 +50,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<Todo> _todoList = [];
   final TextEditingController _titleTextController = TextEditingController();
-  final TextEditingController _descriptionTextController = TextEditingController();
+  bool _titleEmpty = false;
+  final TextEditingController _descriptionTextController =
+      TextEditingController();
 
   void _addToList() {
     setState(() {
-      _todoList.add(Todo(_titleTextController.text, _descriptionTextController.text));
+      _todoList.add(
+          Todo(_titleTextController.text, _descriptionTextController.text));
     });
     _titleTextController.clear();
     _descriptionTextController.clear();
@@ -96,42 +98,52 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(
             context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('New to-do'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _titleTextController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Title cannot be empty';
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(hintText: 'Title'),
+            builder: (BuildContext context) => StatefulBuilder(
+                  builder: (context, setState) => AlertDialog(
+                    title: const Text('New to-do'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: _titleTextController,
+                          decoration: InputDecoration(
+                            hintText: 'Title',
+                            errorText:
+                                _titleEmpty ? 'Title cannot be empty' : null,
+                          ),
+                        ),
+                        TextField(
+                          controller: _descriptionTextController,
+                          decoration:
+                              const InputDecoration(hintText: 'Description'),
+                        )
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            setState(() {
+                              if (_titleTextController.text.isNotEmpty) {
+                                _titleEmpty = false;
+                                _addToList();
+                                Navigator.pop(context, 'OK');
+                              } else {
+                                _titleEmpty = true;
+                              }
+                            });
+                          },
+                          child: const Text('OK')),
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Cancel'))
+                    ],
                   ),
-                  TextField(
-                    controller: _descriptionTextController,
-                    decoration: const InputDecoration(hintText: 'Description'),
-                  )
-                ],
-              ),
-              actions: [
-                TextButton(onPressed: () {
-                  if(_titleTextController.text.isNotEmpty) {
-                    _addToList();
-                    Navigator.pop(context, 'OK');
-                  }
-                }, child: const Text('OK')),
-                TextButton(onPressed:  () => Navigator.pop(context, 'Cancel'), child: const Text('Cancel'))
-              ],
-            )
-        ),
+                )),
         tooltip: 'Add to-do',
         child: const Icon(Icons.add),
       ),
-      bottomSheet: const Text('*Press and hold to delete a to-do!'),// This trailing comma makes auto-formatting nicer for build methods.
+      bottomSheet: const Text(
+          '*Press and hold to delete a to-do!'), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
