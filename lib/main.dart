@@ -48,7 +48,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Todo> _todoList = [];
+  List<Todo> _todoList = [
+    Todo("Title 1", "Description 1"),
+    Todo("Title 2", "Description 2")
+  ];
+  List<Todo> _todoListBackup = [];
   final TextEditingController _titleTextController = TextEditingController();
   bool _titleEmpty = false;
   final TextEditingController _descriptionTextController =
@@ -87,10 +91,32 @@ class _MyHomePageState extends State<MyHomePage> {
           return ListTile(
             title: Text(_todoList[index].title),
             subtitle: Text(_todoList[index].description),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () {
+                setState(() {
+                  _todoListBackup = List.from(_todoList);
+                  _todoList.removeAt(index);
+                });
+                final deleteSnackBar = SnackBar(
+                  content: Text('Deleted ' + _todoList[index].title + '!'),
+                  action: SnackBarAction(
+                    label: 'Undo',
+                    onPressed: () {
+                      setState(() {
+                        _todoList = List.from(_todoListBackup);
+                      });
+                    },
+                  ),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(deleteSnackBar);
+              },
+            ),
             onLongPress: () {
-              setState(() {
-                _todoList.removeAt(index);
-              });
+              final snackBar = SnackBar(
+                  content:
+                      Text('Long pressed ' + _todoList[index].title + '!'));
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
             },
           );
         },
@@ -143,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
       bottomSheet: const Text(
-          '*Press and hold to delete a to-do!'), // This trailing comma makes auto-formatting nicer for build methods.
+          'By Samin Azhan'), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
